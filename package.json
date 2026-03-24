@@ -1,0 +1,17 @@
+{
+  "name": "my-workflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reusable SDLC and workspace workflow baseline",
+  "scripts": {
+    "bootstrap": "bash scripts/bootstrap.sh",
+    "check": "npm run docs:check && npm run hooks:pre && npm run hooks:post",
+    "docs:check": "bash scripts/check-docs.sh",
+    "hooks:pre": "bash scripts/pre-hook.sh",
+    "hooks:post": "bash scripts/post-hook.sh",
+    "cli:setup": "bash scripts/setup-cli.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

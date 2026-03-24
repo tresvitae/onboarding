@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "event": "PostToolUse",
+  "description": "Run deterministic post-checks after tool use.",
+  "command": "bash scripts/post-hook.sh"
+}

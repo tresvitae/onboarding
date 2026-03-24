@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "event": "PreToolUse",
+  "description": "Run deterministic pre-checks before tool use.",
+  "command": "bash scripts/pre-hook.sh"
+}
