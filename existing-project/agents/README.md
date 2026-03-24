@@ -23,6 +23,12 @@ Wbudowana jakość: Automatyczne uwzględnianie obsługi błędów, walidacji da
 
 
 Agent przeglądowy: Pomocnicza sztuczna inteligencja przegląda wersję roboczą pod kątem jakości kodu, problemów z zabezpieczeniami i zgodności ze standardami projektu
+Agent przeglądowy nalizuje wersję roboczą kodu i zapewnia:
+Ocena jakości kodu pod kątem standardów projektu
+Identyfikacja luk w zabezpieczeniach
+Sugestie dotyczące optymalizacji wydajności
+Przegląd zgodności wzorca architektury
+
 Agent dokumentacji: Automatycznie generuje lub aktualizuje dokumentację na podstawie zmian kodu
 
 
@@ -42,3 +48,10 @@ Pomoc dotycząca debugowania
 Wyjaśnienie błędu: W przypadku komunikatów o błędach narzędzie GitHub Copilot często udostępnia wyjaśnienia w postaci zwykłego języka i sugeruje potencjalne poprawki.
 Generowanie instrukcji dziennika: GitHub Copilot może sugerować odpowiednie instrukcje dziennika, aby ułatwić diagnozowanie problemów w złożonych ścieżkach kodu.
 Sugestie dotyczące przypadków testowych: w przypadku błędów, które są trudne do odtworzenia, narzędzie GitHub Copilot może sugerować dodatkowe przypadki testowe, które mogą pomóc w odizolowaniu problemu.
+
+
+# Zaawansowane agenty
+Obsługa decyzji dotyczących architektury: Przeanalizuj kompromisy między różnymi podejściami implementacji, biorąc pod uwagę skalowalność, konserwację i wydajność.
+Analiza wpływu między systemami: Dowiedz się, jak zmiany w jednym składniku wpływają na inne części systemu rozproszonego.
+Złożona koordynacja refaktoryzacji: Orkiestruj zmiany w wielu plikach i modułach, zachowując jednocześnie funkcjonalność i wydajność systemu.
+Optymalizacja wzorca integracji: Sugerowanie optymalnych wzorców łączenia nowych funkcji z istniejącą architekturą systemu.
