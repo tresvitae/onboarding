@@ -21,7 +21,7 @@ export KUBECONFIG=~/.kube/config
 eval "$(/opt/homebrew/bin/brew shellenv)"  # Adds /opt/homebrew/bin
 export PATH="${PATH}:${HOME}/.krew/bin:${HOME}/bin:/usr/local/bin"
 export PATH="/opt/homebrew/opt/node@22/bin:${PATH}"  # Node-specific
-export PATH="/Users/patrykfuta/.antigravity/antigravity/bin:${PATH}"
+export PATH="${HOME}/.antigravity/antigravity/bin:${PATH}"
 
 # Java (detects 21)
 export JAVA_HOME=$(/usr/libexec/java_home -v 21)
