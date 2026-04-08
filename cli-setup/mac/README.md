@@ -1,89 +1,180 @@
-# Step-by-Step
+# macOS Onboarding Guide
 
-sw_vers  # macOS 14+?
-uname -m  # arm64 (M-series)?
+This guide bootstraps a fresh macOS machine for DevOps and cloud development.
+All steps are designed to be repeatable and safe to rerun.
 
-# Xcode tools (git/make)
-xcode-select --install  # Or `softwareupdate --install --all`
+## Scope
 
-# Homebrew
-NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-eval "$(/opt/homebrew/bin/brew shellenv)"
-brew update && brew upgrade && brew cleanup
+- macOS 14+ (Sonoma or newer)
+- zsh shell
+- Homebrew-based package management
 
+## 1. Verify OS and CPU architecture
 
-# Terminal + Editor
-brew install --cask iterm2 neovim
+```bash
+sw_vers
+uname -m  # arm64 or x86_64
+```
 
-# DevOps CLI
-brew install awscli@2 kubectl helm terraform jq fzf tree htop
-brew install --cask docker  # Or colima/lima for lighter
+## 2. Install Apple developer tools
 
-# Krew (kubectl plugins)
-curl https://krew.sh/docs/user_guide/setup/ | bash
-kubectl krew install ctx ns  # kubectx/kubens
+```bash
+xcode-select -p >/dev/null 2>&1 || xcode-select --install
+```
 
-# Java 21
-brew install openjdk@21
+Optional system updates:
 
-# CLI staples
-brew install awscli@2 kubectl helm terraform jq fzf tree htop
+```bash
+softwareupdate --install --all
+```
 
-# Extras (if used)
-brew install ansible node@22  # aztfy, nvm
+## 3. Install and initialize Homebrew
 
+```bash
+if ! command -v brew >/dev/null 2>&1; then
+	NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
 
----
+if [[ "$(uname -m)" == "arm64" ]]; then
+	eval "$(/opt/homebrew/bin/brew shellenv)"
+	grep -q '/opt/homebrew/bin/brew shellenv' ~/.zprofile || echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+else
+	eval "$(/usr/local/bin/brew shellenv)"
+	grep -q '/usr/local/bin/brew shellenv' ~/.zprofile || echo 'eval "$(/usr/local/bin/brew shellenv)"' >> ~/.zprofile
+fi
 
+brew update
+brew upgrade
+brew cleanup
+```
 
-# ZSH + OMZ
+## 4. Install core tooling
 
+```bash
+brew install awscli kubectl helm terraform jq fzf tree htop openjdk@21
+brew install --cask iterm2 font-meslo-lg-nerd-font
+```
 
-# OMZ 
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" --unattended
+Pick one container runtime:
 
-# Key plugins (
-mkdir -p $ZSH/custom/plugins
-cd $ZSH/custom/plugins
-git clone https://github.com/rupa/z.git zsh-z
-git clone https://github.com/zsh-users/zsh-autosuggestions .
-git clone https://github.com/zsh-users/zsh-syntax-highlighting .
-git clone https://github.com/junegunn/fzf.git ~/.fzf  # Shell integration
+```bash
+# Docker Desktop
+brew install --cask docker
 
-# NVM
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+# OR lightweight alternative (Colima)
+brew install colima docker docker-compose
+colima start
+docker context use colima
+```
 
-# Plugins
-ZSH_CUSTOM="$HOME/.oh-my-zsh/custom"
-mkdir -p ${ZSH_CUSTOM}/themes
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM}/themes/powerlevel10k
+## 5. Install kubectl plugin manager (krew)
 
+```bash
+(
+	set -euo pipefail
+	cd "$(mktemp -d)"
+	OS="$(uname | tr '[:upper:]' '[:lower:]')"
+	ARCH="$(uname -m)"
+	case "${ARCH}" in
+		x86_64) ARCH=amd64 ;;
+		arm64|aarch64) ARCH=arm64 ;;
+	esac
+	KREW="krew-${OS}_${ARCH}"
+	curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz"
+	tar zxf "${KREW}.tar.gz"
+	./${KREW} install krew
+)
 
-# Fonts for P10k
-brew install --cask font-meslo-lg-nerd-font
+grep -q 'KREW_ROOT' ~/.zshrc || echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.zshrc
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
+kubectl krew install ctx ns
+```
+
+## 6. Configure zsh, plugins, and prompt
+
+Install Oh My Zsh:
+
+```bash
+if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+	RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+```
+
+Install plugins and theme:
+
+```bash
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+
+[[ -d "${ZSH_CUSTOM}/plugins/z" ]] || git clone --depth=1 https://github.com/rupa/z.git "${ZSH_CUSTOM}/plugins/z"
+[[ -d "${ZSH_CUSTOM}/plugins/zsh-autosuggestions" ]] || git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM}/plugins/zsh-autosuggestions"
+[[ -d "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting" ]] || git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting "${ZSH_CUSTOM}/plugins/zsh-syntax-highlighting"
+[[ -d "${ZSH_CUSTOM}/themes/powerlevel10k" ]] || git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "${ZSH_CUSTOM}/themes/powerlevel10k"
+
+"$(brew --prefix)/opt/fzf/install" --all --no-bash --no-fish
+```
+
+Update `~/.zshrc` (merge with existing values if already customized):
+
+```zsh
+ZSH_THEME="powerlevel10k/powerlevel10k"
+plugins=(git z kubectl terraform aws fzf zsh-autosuggestions zsh-syntax-highlighting)
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+export JAVA_HOME="$(brew --prefix)/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+Then run prompt setup:
+
+```bash
 p10k configure
+```
 
-Choose Unicode for Powerlevel10k configuration on macOS—it's the recommended default for richer visuals like git icons (branch ➤, staged ●), K8s context (☸), and AWS profile without cluttering space.
+## 7. Optional: Node.js with nvm
 
+```bash
+if [[ ! -d "$HOME/.nvm" ]]; then
+	curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+fi
 
----
-Post-Setup Validation
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-# Test startup time (<200ms goal)
+nvm install --lts
+node --version
+npm --version
+```
+
+## 8. Post-setup validation
+
+```bash
+command -v brew kubectl helm terraform aws java jq fzf
+kubectl version --client
+helm version --short
+terraform version
+aws --version
+java -version
+
 time zsh -i -c exit
+zsh -n ~/.zshrc
 
-# Security audit
-zsh -n ~/.zshrc  # Syntax
-alias | grep -E 'k|tf|aws'  # Key aliases
-kubectl config view --minify  # Kube safe?
+kubectl config current-context
+kubectl ctx || true
+kubectl ns || true
+```
 
-k ctx  # Aliases work?
-echo $JAVA_HOME  # /Library/Java/.../21
+Security hardening:
 
-
-# Secyruty
-chmod 600 ~/.zshrc ~/.kube/config ~/.aws/config
+```bash
+chmod 600 ~/.zshrc 2>/dev/null || true
+chmod 600 ~/.kube/config 2>/dev/null || true
+chmod 600 ~/.aws/config 2>/dev/null || true
 git config --global credential.helper osxkeychain
+```
 
----
+## Troubleshooting
+
+- If `brew` is not found, run `source ~/.zprofile`.
+- If `kubectl krew` is not found, open a new terminal or run `source ~/.zshrc`.
+- If `docker` fails with Colima, run `colima status` and `colima start`.
+- If shell startup is slow, profile with `zsh -i -c 'zmodload zsh/zprof; zprof'`.
