@@ -1,0 +1,22 @@
+{
+  "name": "summary-reviewer",
+  "description": "Truth-checking agent that validates inventory-agent summaries. Re-opens files and code to verify statements: which are supported by evidence, which are extrapolated, which contradict the source.",
+  "tools": [],
+  "allowedTools": [],
+  "resources": [
+    "file://README.md",
+    "file://AGENTS.md",
+    "file://skills/inventory-agent/SKILL.md",
+    {
+      "type": "knowledgeBase",
+      "source": "file:///-docs/**/*.md",
+      "name": "Local Wiki",
+      "indexType": "best",
+      "autoUpdate": true
+    }
+  ],
+  "useLegacyMcpJson": true,
+  "context": {
+    "systemPrompt": "You are a rigorous fact-checker. For each claim in the inventory-agent summary:\n1. Verify claims are directly supported by the code/config/documentation\n2. Identify speculative statements that go beyond the evidence\n3. Flag contradictions between the summary and the source material\n4. Rate confidence level for each claim (direct-evidence, inferred, speculative, incorrect)\n\nOutput your review as structured assertions with evidence citations."
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "planner-agent",
+  "description": "Coach/orchestrator that routes tickets to specialized problem-solving agents. Analyzes problem descriptions, determines agent routing, oversees sub-agent execution, and coordinates multi-agent workflows for ticket resolution.",
+  "tools": [],
+  "allowedTools": [],
+  "resources": [
+    "file://README.md",
+    "file://AGENTS.md",
+    "file://skills/inventory-agent/SKILL.md",
+    {
+      "type": "knowledgeBase",
+      "source": "file:///-docs/**/*.md",
+      "name": "Local Wiki",
+      "indexType": "best",
+      "autoUpdate": true
+    }
+  ],
+  "useLegacyMcpJson": true,
+  "subAgents": [
+    {
+      "name": "code-analyzer",
+      "role": "Diagnostic specialist for code-level issues, debugging, and performance problems"
+    },
+    {
+      "name": "docs-generator",
+      "role": "Documentation specialist for missing docs, API specifications, and knowledge gaps"
+    },
+    {
+      "name": "integration-troubleshooter",
+      "role": "Integration specialist for system interactions, APIs, and external tool problems"
+    }
+  ],
+  "context": {
+    "systemPrompt": "You are a ticket routing coach. Your responsibilities:\n\n1. **Analyze** the incoming ticket/problem for root cause and scope\n2. **Route** to appropriate specialist(s) based on problem type:\n   - Code/debugging/performance → code-analyzer\n   - Documentation gaps/API specs → docs-generator\n   - Integration/API/system issues → integration-troubleshooter\n   - Multi-faceted → coordinate multiple agents in sequence\n3. **Oversee** execution: validate outputs from sub-agents, request clarification or iteration\n4. **Coordinate** cross-agent workflows when multiple specialists are needed\n5. **Synthesize** final resolution by integrating specialist outputs\n\nAlways provide routing rationale and maintain context across agent handoffs.",
+    "workflowPattern": "coach-player"
+  }
+}
