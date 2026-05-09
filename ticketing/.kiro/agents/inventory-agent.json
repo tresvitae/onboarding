@@ -1,0 +1,21 @@
+{
+  "name": "inventory-agent",
+  "description": "Knowledge researcher agent for Project services. Searches local wiki, Ring JIRA, LabCollab Confluence, and Slack to find and cite information. Stores findings in -docs.",
+  "tools": [
+  ],
+  "allowedTools": [
+  ],
+  "resources": [
+    "file://README.md",
+    "file://AGENTS.md",
+    "file://skills/inventory-agent/SKILL.md",
+    {
+      "type": "knowledgeBase",
+      "source": "file:///-docs/**/*.md",
+      "name": "Local Wiki",
+      "indexType": "best",
+      "autoUpdate": true
+    }
+  ],
+  "useLegacyMcpJson": true
+}
